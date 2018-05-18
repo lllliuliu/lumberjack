@@ -108,10 +108,10 @@ type Logger struct {
 	Compress bool `json:"compress" yaml:"compress"`
 
 	// Permissions when creating a log file.
-	FilePrem int `json:"fileperm" yaml:"fileperm"`
+	FilePrem os.FileMode `json:"fileperm" yaml:"fileperm"`
 
 	// Permissions when creating a for folder.
-	DirPrem int `json:"dirperm" yaml:"dirperm"`
+	DirPrem os.FileMode `json:"dirperm" yaml:"dirperm"`
 
 	size int64
 	file *os.File
