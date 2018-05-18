@@ -107,6 +107,12 @@ type Logger struct {
 	// using gzip. The default is not to perform compression.
 	Compress bool `json:"compress" yaml:"compress"`
 
+	// Permissions when creating a log file.
+	FilePrem int `json:"fileperm" yaml:"fileperm"`
+
+	// Permissions when creating a for folder.
+	DirPrem int `json:"dirperm" yaml:"dirperm"`
+
 	size int64
 	file *os.File
 	mu   sync.Mutex
@@ -206,13 +212,13 @@ func (l *Logger) rotate() error {
 // openNew opens a new log file for writing, moving any old log file out of the
 // way.  This methods assumes the file has already been closed.
 func (l *Logger) openNew() error {
-	err := os.MkdirAll(l.dir(), 0744)
+	err := os.MkdirAll(l.dir(), l.DirPrem)
 	if err != nil {
 		return fmt.Errorf("can't make directories for new logfile: %s", err)
 	}
 
 	name := l.filename()
-	mode := os.FileMode(0644)
+	mode := os.FileMode(l.FilePrem)
 	info, err := os_Stat(name)
 	if err == nil {
 		// Copy the mode off the old logfile.
@@ -277,7 +283,7 @@ func (l *Logger) openExistingOrNew(writeLen int) error {
 		return l.rotate()
 	}
 
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, l.FilePrem)
 	if err != nil {
 		// if we fail to open the old log file for some reason, just ignore
 		// it and open a new log file.
